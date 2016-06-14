@@ -1,0 +1,126 @@
+
+
+# To use pyspark in the notebook we first import findspark:
+import findspark
+findspark.init()
+import pyspark
+sc = pyspark.SparkContext() # local mode
+
+assert sc is not null
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+  # % matplotlib inline (doesn't function in Databricks)
+
+mu1, sigma1 = 1955364, 15430
+asx = np.random.normal(mu1, sigma1, k)
+asx[asx<0] = 0
+mu2, sigma2 = 956824, 3574
+mic = np.random.normal(mu2, sigma2, k)
+mic[mic<0] = 0
+soh = poisson.rvs(mu=0.99, loc=0, size=N)
+dplan = binom.rvs(n=1, p=0.7, size=N)
+
+# join data
+
+dt = {'asx': asx,
+      'mic': mic,
+      'soh': soh,
+      'dplan' : dplan}
+      
+data = pd.DataFrame(dt)
+
+# Generate Spark DataFrame
+data = sqlContext.createDataFrame(data)
+
+# Exploratory Data Analysis:
+
+data.printSchema()
+
+desc = data.describe()
+desc.show()
+
+
+
+from pyspark.ml.feature import VectorAssembler, PCA
+
+# First assemble data
+assembler = VectorAssembler(inputCols=['asx','mic','soh', 'dplan'],
+                            outputCol='features')
+out = assembler.transform(data)
+
+
+# Do PCA
+pca = PCA(k=2,inputCol='features',outputCol='pca')
+model = pca.fit(out)
+pca_out = model.transform(out)
+
+# Plot PCA
+aux = pca_out.select('pca')
+aux = aux.map(lambda x: {'pca1':x[0].array.item(0), 'pca2':x[0].array.item(1)})
+aux = aux.toDF(schema=['pca1','pca2'])
+display(aux)
+
+
+
+# Percentiles, Quartiles
+from pyspark.sql.functions import percent_rank, ntile
+from pyspark.sql.window import Window
+
+w = Window.partitionBy().orderBy('asx')
+ptiles = data.select('asx', percent_rank().over(w).alias('ptile'))
+
+
+asx_perc = [] #empty list
+ran = np.arange(0, 110, 10)/float(100)
+for r in ran:
+  asx_perc.append(ptiles.select('asx', 'ptile').where("round(float(ptile), 10)>='"+str(r)+"'").toPandas().ix[0,0]) 
+    # .ix[0,0] es el index , el primer elemento de la matriz resultante
+perc_10 = pd.DataFrame({'asx':asx_perc, 'ptile': ran})
+ 
+
+# quartiles
+
+asx_perc4 = [] #empty list
+ran4 = np.arange(0, 110, 25)/float(100)
+
+for r in ran4:
+  asx_perc4.append(ptiles.select('asx', 'ptile').where("round(float(ptile), 10)>='"+str(r)+"'").toPandas().ix[0,0]) 
+quartiles = pd.DataFrame({'asx':asx_perc4,
+                         'ptile': ran4})
+
+quartiles
+
+
+# Univariate boxplots
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+data_pd = data.toPandas()
+fig,ax = plt.subplots()
+ax = plt.boxplot(data_pd['asx'])
+plt.ylim((-500,2000))
+
+display(fig)
+
+
+# Multiple univariate boxplots
+
+data_to_plot = [data_pd['mic'], data_pd['asx']]
+
+fig, ax = plt.subplots()
+
+bp = plt.boxplot(data_to_plot, widths = 0.6)
+
+for whisker in bp['whiskers']:
+  whisker.set(color='#7570b3', linewidth=2)
+  
+for flier in bp['fliers']:
+  flier.set(marker='o', color='#e7298a', alpha=0.5)
+  
+plt.ylim((-500, 2500))
+
+
+display(fig)
