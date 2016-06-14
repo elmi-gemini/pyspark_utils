@@ -1,0 +1,19 @@
+
+Summary statistics
+
+We provide column summary statistics for RDD[Vector] through the function colStats available in Statistics.
+
+
+colStats() returns an instance of MultivariateStatisticalSummary, which contains the column-wise max, min, mean, variance, and number of nonzeros, as well as the total count.
+
+from pyspark.mllib.stat import Statistics
+
+sc = ... # SparkContext
+
+mat = ... # an RDD of Vectors
+
+# Compute column summary statistics.
+summary = Statistics.colStats(mat)
+print(summary.mean())
+print(summary.variance())
+print(summary.numNonzeros())
