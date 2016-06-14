@@ -1,8 +1,7 @@
 
 
-# To use pyspark in the notebook we first import findspark:
-import findspark
-findspark.init()
+'''import findspark
+findspark.init()'''
 import pyspark
 sc = pyspark.SparkContext() # local mode
 
@@ -103,7 +102,7 @@ fig,ax = plt.subplots()
 ax = plt.boxplot(data_pd['asx'])
 plt.ylim((-500,2000))
 
-display(fig)
+display(fig) #databricks plotting feature, to be revised 
 
 
 # Multiple univariate boxplots
