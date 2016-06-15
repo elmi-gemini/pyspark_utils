@@ -1,5 +1,5 @@
 
-Summary statistics
+Summary statistics for RDD-s
 
 We provide column summary statistics for RDD[Vector] through the function colStats available in Statistics.
 
