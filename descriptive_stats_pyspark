@@ -92,7 +92,11 @@ quartiles = pd.DataFrame({'asx':asx_perc4,
 quartiles
 
 
-# Univariate boxplots
+
+
+                                                            BOXPLOTS
+
+# Univariate boxplots - Databricks version
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -102,10 +106,10 @@ fig,ax = plt.subplots()
 ax = plt.boxplot(data_pd['asx'])
 plt.ylim((-500,2000))
 
-display(fig) #databricks plotting feature, to be revised 
+display(fig) 
 
 
-# Multiple univariate boxplots
+# Multiple univariate boxplots - Databricks version
 
 data_to_plot = [data_pd['mic'], data_pd['asx']]
 
@@ -119,7 +123,14 @@ for whisker in bp['whiskers']:
 for flier in bp['fliers']:
   flier.set(marker='o', color='#e7298a', alpha=0.5)
   
-plt.ylim((-500, 2500))
-
+plt.ylim((-500, 2500)
 
 display(fig)
+
+
+# Multiple univariate boxplots - Hadoop version (works with over 14 mln observations).
+
+dfuser_pd = dfuser['var1', 'var2', 'var3'].toPandas()
+dfuser_pd.plot.box()
+
+
