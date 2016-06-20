@@ -1,0 +1,78 @@
+
+#K-Means
+
+from pyspark.sql.functions import when
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.clustering import KMeans
+
+tabla_clust = sqlContext.table(...)
+
+tabla_clust=tabla_final.select('client_nr','designer', 'day','sales')
+tabla_clust.first()
+
+tabla_clust2 = tabla_clust.dropna(how='any')
+
+featureCols=tabla_clust2.columns[2:]
+
+# build features assemble
+
+assembler = VectorAssembler(
+    inputCols=featureCols,
+    outputCol="features")
+output = assembler.transform(tabla_clust2)
+output.show()
+
+kmeans = KMeans(k=3, seed=1)
+model = kmeans.fit(output)
+model
+
+
+centers = model.clusterCenters()
+centers
+
+transformed = model.transform(output).select('client_nr', 'day', 'prediction')
+transformed.show()
+
+data_pivot = transformed.groupBy('client_nr','day','prediction').pivot('day').min('prediction').na.fill(0).\
+                drop('ref_month').drop('prediction').groupBy('nr_tlfn').sum()
+                
+
+data_pivot = data_pivot.withColumnRenamed('sum(201510)','201510')
+data_pivot = data_pivot.withColumnRenamed('sum(201511)','201511')
+data_pivot = data_pivot.withColumnRenamed('sum(201512)','201512')
+data_pivot = data_pivot.withColumnRenamed('sum(201601)','201601')
+data_pivot = data_pivot.withColumnRenamed('sum(201602)','201602')
+data_pivot = data_pivot.withColumnRenamed('sum(201603)','201603')
+data_pivot.show()
+
+
+# GaussianMixture clustering
+
+from pyspark.mllib.clustering import GaussianMixture
+
+from pyspark.mllib.linalg import Vectors, DenseMatrix
+from numpy.testing import assert_equal
+from shutil import rmtree
+import os, tempfile
+
+
+rdd_balmain = tabla_clust2.rdd
+#type(rdd_balmain)
+#rdd_balmain.count()
+
+rdd_balmain_conv = rdd_balmain.map(lambda data: Vectors.dense([float(c) for c in data]))
+
+# Build the model (cluster the data)
+gmm = GaussianMixture.train(rdd_balmain_conv, 3)
+
+# output parameters of model
+for i in range(2):
+    print ("weight = ", gmm.weights[i], "mu = ", gmm.gaussians[i].mu,
+        "sigma = ", gmm.gaussians[i].sigma.toArray())
+        
+# interpretation
+
+
+
+
+
