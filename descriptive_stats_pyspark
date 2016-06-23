@@ -2,8 +2,10 @@
 
 '''import findspark
 findspark.init()'''
+
 import pyspark
 sc = pyspark.SparkContext() # local mode
+
 
 assert sc is not null
 
@@ -12,31 +14,41 @@ import pandas as pd
 import matplotlib.pyplot as plt
   # % matplotlib inline (doesn't function in Databricks)
 
+from scipy.stats import binom, norm, poisson
+
+
+N = 100000
+seed = 1423
+
+
+# Generate synthetic data
 mu1, sigma1 = 1955364, 15430
 asx = np.random.normal(mu1, sigma1, k)
 asx[asx<0] = 0
+
 mu2, sigma2 = 956824, 3574
 mic = np.random.normal(mu2, sigma2, k)
 mic[mic<0] = 0
+
 soh = poisson.rvs(mu=0.99, loc=0, size=N)
+
 dplan = binom.rvs(n=1, p=0.7, size=N)
 
-# join data
+
+# Join into dataset 
 
 dt = {'asx': asx,
       'mic': mic,
       'soh': soh,
       'dplan' : dplan}
-      
 data = pd.DataFrame(dt)
 
-# Generate Spark DataFrame
+
+# Generate Spark DataFrame:
 data = sqlContext.createDataFrame(data)
 
 # Exploratory Data Analysis:
-
 data.printSchema()
-
 desc = data.describe()
 desc.show()
 
@@ -60,6 +72,8 @@ aux = pca_out.select('pca')
 aux = aux.map(lambda x: {'pca1':x[0].array.item(0), 'pca2':x[0].array.item(1)})
 aux = aux.toDF(schema=['pca1','pca2'])
 display(aux)
+
+
 
 
 
@@ -94,6 +108,8 @@ quartiles
 
 
 
+
+
                                                             BOXPLOTS
 
 # Univariate boxplots - Databricks version
@@ -109,12 +125,12 @@ plt.ylim((-500,2000))
 display(fig) 
 
 
+
 # Multiple univariate boxplots - Databricks version
 
 data_to_plot = [data_pd['mic'], data_pd['asx']]
 
 fig, ax = plt.subplots()
-
 bp = plt.boxplot(data_to_plot, widths = 0.6)
 
 for whisker in bp['whiskers']:
@@ -124,7 +140,6 @@ for flier in bp['fliers']:
   flier.set(marker='o', color='#e7298a', alpha=0.5)
   
 plt.ylim((-500, 2500)
-
 display(fig)
 
 
