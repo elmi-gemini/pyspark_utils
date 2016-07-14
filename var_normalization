@@ -1,0 +1,25 @@
+
+users_noscaled=users_addedmonths
+
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.feature import MinMaxScaler
+
+#call the vector assembler
+assembler = VectorAssembler(
+  inputCols=users_noscaled.columns[7:], outputCol='assembled_col'
+)
+
+#call the scaler
+scaler = MinMaxScaler(
+  inputCol="assembled_col", outputCol="assembled_col_norm"
+)
+
+#build an assembleed vector in the dataframe
+assembled=assembler.transform(users_noscaled)
+
+#build the scaler model
+scaler_model= scaler.fit(assembled)
+
+#Apply the model to the transformed dataframe
+users_wscaled=scaler_model.transform(assembled)
+
