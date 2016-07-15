@@ -1,5 +1,8 @@
 
-# Elbow function for finding the optimal K in K-Means:
+# Elbow function for finding the optimal K in K-Means (graphing variance):
+
+# cdist: distance computation between sets of observations
+# pdist: pairwise distances between observations in the same set
 
 import pandas as pd
 import matplotlib.pyplot as plt
