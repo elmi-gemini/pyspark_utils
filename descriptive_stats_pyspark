@@ -4,7 +4,7 @@
 findspark.init()'''
 
 import pyspark
-sc = pyspark.SparkContext() # local mode
+sc = pyspark.SparkContext() # local PC mode
 
 
 assert sc is not null
@@ -59,6 +59,7 @@ from pyspark.ml.feature import VectorAssembler, PCA
 # First assemble data
 assembler = VectorAssembler(inputCols=['asx','mic','soh', 'dplan'],
                             outputCol='features')
+
 out = assembler.transform(data)
 
 
@@ -112,7 +113,7 @@ quartiles
 
                                                             BOXPLOTS
 
-# Univariate boxplots - Databricks version
+# Univariate boxplots - DATABRICKS version
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -126,7 +127,7 @@ display(fig)
 
 
 
-# Multiple univariate boxplots - Databricks version
+# Multiple univariate boxplots - DATABRICKS version
 
 data_to_plot = [data_pd['mic'], data_pd['asx']]
 

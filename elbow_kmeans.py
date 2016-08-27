@@ -11,7 +11,7 @@ from sklearn.cluster import KMeans
 from scipy.spatial.distance import cdist, pdist
 import numpy as np
 
-def eblow(df, n):
+def elbow(df, n):
     kMeansVar = [KMeans(n_clusters=k).fit(df.values) for k in range(1, n)]
     centroids = [X.cluster_centers_ for X in kMeansVar]
     k_euclid = [cdist(df.values, cent) for cent in centroids]
